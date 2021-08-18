@@ -7,6 +7,7 @@
 
 # set Super-Key as Mod-Key
 set $mod Mod4
+set $modkey Mod4
 
 font pango:Inconsolata 11
 
@@ -64,6 +65,36 @@ bindsym $mod+space focus mode_toggle
 # focus the parent container
 bindsym $mod+a focus parent
 
+# blue theme
+set $xforeground #c5c8c6
+set $xbackground #1d1f21
+set $xcursor #c5c8c6
+set $xcolor0 #0d3264
+set $xcolor8 #373b41
+set $xcolor1 #467ecb
+set $xcolor9 #cc6666
+set $xcolor2 #8c9440
+set $xcolor10 #b5bd68
+set $xcolor3 #de935f
+set $xcolor11 #f0c674
+set $xcolor4 #5f819d
+set $xcolor12 #81a2be
+set $xcolor5 #85678f
+set $xcolor13 #b294bb
+set $xcolor6 #6298e0
+set $xcolor14 #8abeb7
+set $xcolor7 #707880
+set $xcolor15 #c5c8c6
+
+# Colors
+# Class                 border          backgr      text            indic
+client.focused          $xcolor6       $xcolor1     $xbackground   $xcolor7
+client.focused_inactive $xcolor6       $xcolor0     $xcolor14
+client.unfocused        $xcolor6       $xcolor0     $xcolor14
+client.urgent           $xbackground   $xcolor9     $xbackground
+client.placeholder      $xcolor7       $xcolor7     $xcolor14
+
+
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1"
@@ -105,48 +136,90 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
-# Execute mode for starting applications
-mode "execute" {
-        bindsym e exec thunar
-        bindsym f exec firefox
-        bindsym m exec thunderbird
-        bindsym t exec texstudio
+mode "resize" {
+    # These bindings trigger as soon as you enter the resize mode
 
-        bindsym Return mode "default"
-        bindsym $mod+x mode "default"
-        bindsym Escape mode "default"
+    # Pressing left will shrink the window’s width.
+    # Pressing right will grow the window’s width.
+    # Pressing up will shrink the window’s height.
+    # Pressing down will grow the window’s height.
+    bindsym $left       resize shrink width 12 px or 12 ppt
+    bindsym $down       resize grow height 12 px or 12 ppt
+    bindsym $up         resize shrink height 12 px or 12 ppt
+    bindsym $right      resize grow width 12 px or 12 ppt
+
+    # same bindings, but for the arrow keys
+    bindsym Left        resize shrink width 12 px or 12 ppt
+    bindsym Down        resize grow height 12 px or 12 ppt
+    bindsym Up          resize shrink height 12 px or 12 ppt
+    bindsym Right       resize grow width 12 px or 12 ppt
+
+    bindsym $modkey+$left       resize shrink width 01 px or 01 ppt
+    bindsym $modkey+$down       resize grow height 01 px or 01 ppt
+    bindsym $modkey+$up         resize shrink height 01 px or 01 ppt
+    bindsym $modkey+$right      resize grow width 01 px or 01 ppt
+
+    bindsym $modkey+Left        resize shrink width 01 px or 01 ppt
+    bindsym $modkey+Down        resize grow height 01 px or 01 ppt
+    bindsym $modkey+Up          resize shrink height 01 px or 01 ppt
+    bindsym $modkey+Right       resize grow width 01 px or 01 ppt
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
 }
-bindsym $mod+x mode "executte"
 
-# set color variables
-set $main-color #2a2e32
-set $text-color #f3f4f5
-set $inactive-text-color #676e7d
-set $inactive-bg-color #2a2e32
-set $urgent-color #e52222
+bindsym $modkey+r mode "resize"
 
-# set main colors
-client.focused $main-color $main-color $text-color $main-color
-client.unfocused $main-color $main-color $inactive-text-color $main-color
-client.focused_inactive $main-color $main-color $main-color $inactive-bg-color
-client.urgent $urgent-color $urgent-color $text-color $urgent-color
 
 # set i3bar
 bar {
-        status_command i3blocks -c /home/christian/.config/i3/i3blocks.conf
-        position top
-        colors {
-                background $main-color
-                separator #757575
+    status_command i3blocks -c /home/christian/.config/i3/i3blocks.conf
+    mode dock
+    position top
+    strip_workspace_numbers yes
 
-                focused_workspace $main-color $main-color $text-color
-                inactive_workspace $main-color $main-color $inactive-text-color
-                urgent_workspace $urgent-color $urgent-color $text-color
-        }
+    colors {
+        #Where      #Color
+        background  #2a2e32
+        statusline  $xforeground
+        separator #757575
+
+        #Where              #Border         #Background     #Text
+        focused_workspace   $xbackground    $xcolor1        $xbackground
+        urgent_workspace    $xbackground    $xcolor9        $xbackground
+        #urgent_workspace    $xbackground    $xcolor1        $xbackground
+        inactive_workspace  $xbackground    $xcolor0        $xforeground
+    }
 }
+
+# Toggle bar
+bindsym $modkey+m bar mode toggle
+
+# Back and forth when pressing the same workspace keybind
+workspace_auto_back_and_forth yes
+
+# Display urgent notification on windows
+force_display_urgency_hint 500 ms
+
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown, (b) off-screen
+mode "$mode_system" {
+    bindsym l exec --no-startup-id $Locker, mode "default"
+    bindsym e exec --no-startup-id i3-msg exit, mode "default"
+    bindsym s exec --no-startup-id $Locker && systemctl suspend, mode "default"
+    bindsym h exec --no-startup-id $Locker && systemctl hibernate, mode "default"
+    bindsym r exec --no-startup-id systemctl reboot, mode "default"
+    bindsym b exec --no-startup-id sleep 1 && xset dpms force off, mode "default"
+    bindsym Shift+s exec --no-startup-id systemctl poweroff -i, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $modkey+Shift+e mode "$mode_system"
+
 
 # set shortcuts for i3lock and rofi
 bindsym $mod+Shift+x exec i3lock -f -i ~/.config/i3lock/wallpaper.png
@@ -168,9 +241,18 @@ bindsym Print exec --no-startup-id xfce4-screenshooter --fullscreen
 
 # set gaps between windows and thicker borders
 for_window [class="^.*"] border pixel 3
-gaps inner 5
+# Floating dialogs
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="task_dialog"] floating enable
+
+# i3-gaps configuration
+gaps inner 10
+gaps outer 0
 smart_gaps on
 smart_borders on
+
+bindsym $Mod+g gaps inner current minus 5
+bindsym $Mod+Shift+g gaps inner current plus 5
 
 # set background picture
 exec feh --bg-fill /usr/share/blackarch/wallpaper.png
